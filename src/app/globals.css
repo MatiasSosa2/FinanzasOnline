@@ -2,25 +2,290 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #080808;
+  
+  /* Brand Colors — Tactical Executive Warmth */
+  --color-military: #3A4D39;       /* Deep Olive Green — Authority */
+  --color-military-dark: #2A3D29;  /* Darkest olive — text on light */
+  --color-military-light: #EBF0EA; /* Ultra light olive — hover surfaces */
+  --color-military-mid: #5A7A57;   /* Mid olive — chart accent */
+  
+  --color-gold: #C5A065;           /* Matte Gold — Value & Accent */
+  --color-gold-dark: #A07842;      /* Deep gold for text */
+  --color-gold-light: #FAF6EE;     /* Warm cream for gold backgrounds */
+
+  /* Structural palette — stepped depth hierarchy */
+  --color-bone: #C8C3BB;           /* Canvas — warm stone, visible contrast vs white cards */
+  --color-sand: #B8B2A9;           /* Secondary surface — slightly darker than bone */
+  --color-oxide: #A65D57;          /* Oxide Red — risk/alerts */
+
+  /* Deep structure */
+  --color-carbon: #1A1A1A;
+  --color-carbon-mid: #2A2A2A;
+  --color-slate: #D4CFC7;          /* Tertiary bg — slightly lighter than bone */
+
+  /* Pro palette — institutional green tones */
+  --color-forest: #1B4332;         /* Deep forest green — sidebar authority */
+  --color-emerald: #2D6A4F;        /* Vibrant emerald — profit indicators */
+  --color-emerald-light: #D8F3DC;  /* Soft emerald — positive backgrounds */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-sans: var(--font-inter), 'Inter', var(--font-archivo), 'Archivo', system-ui, sans-serif;
+  --font-archivo: var(--font-archivo), 'Archivo', system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), 'Courier New', monospace;
+  
+  --color-brand-military: var(--color-military);
+  --color-brand-military-dark: var(--color-military-dark);
+  --color-brand-military-light: var(--color-military-light);
+  --color-brand-military-mid: var(--color-military-mid);
+  
+  --color-brand-gold: var(--color-gold);
+  --color-brand-gold-dark: var(--color-gold-dark);
+  --color-brand-gold-light: var(--color-gold-light);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-brand-bone: var(--color-bone);
+  --color-brand-sand: var(--color-sand);
+  --color-brand-oxide: var(--color-oxide);
+
+  --color-brand-carbon: var(--color-carbon);
+  --color-brand-carbon-mid: var(--color-carbon-mid);
+  --color-brand-slate: var(--color-slate);
+
+  --color-brand-forest: var(--color-forest);
+  --color-brand-emerald: var(--color-emerald);
+  --color-brand-emerald-light: var(--color-emerald-light);
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  background-color: var(--color-bone);
+  background-image: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-size: 15px;
+}
+
+/* Card executive style — use donde sea */
+.executive-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+}
+
+/* Tipografía numérica tabular — alineación perfecta en columnas */
+.num-tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Fuente de títulos institucionales */
+.font-title {
+  font-family: var(--font-archivo), 'Archivo', system-ui, sans-serif;
+}
+
+/* Sistema de bordes corporativos */
+.card-border {
+  border: 0.5px solid rgba(0,0,0,0.10);
+}
+
+/* Hover dorado en filas de datos */
+.data-row {
+  transition: border-color 0.15s ease;
+  border-left: 2px solid transparent;
+}
+.data-row:hover {
+  border-left-color: var(--color-gold);
+}
+
+/* Tipografía numérica de alto impacto */
+.num-hero {
+  font-family: var(--font-mono);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+/* Labels corporativos */
+.label-corp {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   DARK MODE — data-theme="dark" en <html>
+   ──────────────────────────────────────────────────────────────── */
+
+[data-theme="dark"] {
+  --foreground: #E8E8E8;
+  --background: #141414;
+  --color-bone:           #111111;
+
+  /* Tokens de marca — verde solo como acento */
+  --color-military:       #5A8A55;
+  --color-military-dark:  #8FC486;
+  --color-military-light: #1E2A1E;
+  --color-military-mid:   #6A9B63;
+
+  --color-gold:           #C8A96E;
+  --color-gold-dark:      #C8A96E;
+  --color-gold-light:     #231B0E;
+
+  --color-sand:           #2A2A2A;
+  --color-oxide:          #C47570;
+
+  --color-carbon:         #070707;
+  --color-carbon-mid:     #101010;
+  --color-slate:          #222222;
+}
+
+/* Body en dark */
+[data-theme="dark"] body {
+  background-color: #111111;
+  background-image: none;
+  color: #E8E8E8;
+}
+
+/* ── Cards y superficies blancas ── */
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .executive-card {
+  background-color: #1C1C1C !important;
+}
+[data-theme="dark"] .bg-brand-slate,
+[data-theme="dark"] .bg-brand-bone {
+  background-color: #252525 !important;
+}
+
+/* ── Textos ── */
+[data-theme="dark"] .text-gray-900,
+[data-theme="dark"] .text-gray-800 {
+  color: #F0F0F0 !important;
+}
+[data-theme="dark"] .text-gray-700 {
+  color: #D0D0D0 !important;
+}
+[data-theme="dark"] .text-gray-600,
+[data-theme="dark"] .text-gray-500 {
+  color: rgba(220,220,220,0.65) !important;
+}
+[data-theme="dark"] .text-gray-400,
+[data-theme="dark"] .text-gray-300 {
+  color: rgba(220,220,220,0.40) !important;
+}
+
+/* ── Bordes ── */
+[data-theme="dark"] .border-gray-200,
+[data-theme="dark"] .border-gray-300\/60,
+[data-theme="dark"] .border-gray-300 {
+  border-color: rgba(255,255,255,0.08) !important;
+}
+[data-theme="dark"] .border-black\/\[0\.07\],
+[data-theme="dark"] .border-black\/\[0\.06\] {
+  border-color: rgba(255,255,255,0.06) !important;
+}
+[data-theme="dark"] .border-black\/\[0\.05\] {
+  border-color: rgba(255,255,255,0.05) !important;
+}
+[data-theme="dark"] .divide-black\/\[0\.05\] > * + * {
+  border-color: rgba(255,255,255,0.05) !important;
+}
+[data-theme="dark"] .divide-x > * + *,
+[data-theme="dark"] .divide-y > * + * {
+  border-color: rgba(255,255,255,0.06) !important;
+}
+
+/* ── Fondos de accent claro ── */
+[data-theme="dark"] .bg-white\/80,
+[data-theme="dark"] .bg-white\/90 {
+  background-color: rgba(20,28,20,0.85) !important;
+}
+
+/* ── Inputs, selects, textareas ── */
+[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background-color: #2A2A2A !important;
+  color: #E8E8E8 !important;
+  border-color: rgba(255,255,255,0.10) !important;
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: rgba(220,220,220,0.30) !important;
+}
+[data-theme="dark"] option {
+  background-color: #2A2A2A;
+  color: #E8E8E8;
+}
+
+/* ── Labels y textos auxiliares ── */
+[data-theme="dark"] .text-brand-gold-dark {
+  color: var(--color-gold) !important;
+}
+[data-theme="dark"] label {
+  color: rgba(180,210,180,0.70);
+}
+
+/* ── Scrollbar ── */
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 6px;
+}
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: #0D130D;
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(90,138,85,0.35);
+  border-radius: 3px;
+}
+
+/* ── Sidebar ── */
+[data-theme="dark"] aside {
+  background-color: #0F0F0F !important;
+  border-color: rgba(255,255,255,0.05) !important;
+}
+[data-theme="dark"] aside .bg-white {
+  background-color: #0F0F0F !important;
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+
+/* ── Print / PDF ─────────────────────────────────────────────── */
+@media print {
+  /* Ocultar elementos de navegación y controles */
+  .no-print,
+  aside,
+  nav,
+  header a,
+  button:not(.print-visible) {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    background-image: none !important;
+    color: black;
+    font-size: 10pt;
+  }
+
+  /* Cada panel en su propia página si es muy alto */
+  section {
+    page-break-inside: avoid;
+  }
+
+  /* Quitar sombras y fondos semitransparentes */
+  * {
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Asegurar que los colores de marca se impriman */
+  @page {
+    margin: 1.5cm;
+    size: A4 landscape;
+  }
 }

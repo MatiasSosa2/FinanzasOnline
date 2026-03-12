@@ -1,0 +1,271 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// --- AUTHENTICATION (NextAuth.js Standard + Custom User Fields) ---
+
+model User {
+  id            String    @id @default(uuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // Para logueo con contraseña
+  
+  accounts      AccountAuth[]
+  sessions      Session[]
+  
+  // Relación con Negocios (Un usuario puede estar en varios negocios)
+  memberships   BusinessMember[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model AccountAuth {
+  id                 String  @id @default(uuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("Account_Auth_NextAuth") // Renombramos tabla para evitar conflicto conceptual con cuentas financieras
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+}
+
+// --- BUSINESS LOGIC (Multi-Tenancy) ---
+
+model Business {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String?  @unique // Para URLs amigables opcional
+  currency    String   @default("ARS") // Moneda base del negocio
+
+  members     BusinessMember[]
+
+  // Tablas Financieras pertenecientes al negocio
+  accounts    Account[]
+  categories  Category[]
+  transactions Transaction[]
+  contacts    Contact[]
+  areas       AreaNegocio[]
+  productos   Producto[]
+  bienes      BienDeUso[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model BusinessMember {
+  id         String   @id @default(uuid())
+  role       String   @default("COLLABORATOR") // ADMIN | COLLABORATOR | VIEWER
+  
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, businessId]) // Un usuario solo puede tener un rol por negocio
+}
+
+// --- FINANCIAL MODELS (Scoped by Business) ---
+
+model Account {
+  id             String        @id @default(uuid())
+  name           String
+  description    String?
+  type           String
+  currency       String        @default("ARS")         
+  currentBalance Float         @default(0)
+  
+  transactions   Transaction[]
+  
+  businessId     String
+  business       Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Category {
+  id           String        @id @default(uuid())
+  name         String
+  type         String
+  transactions Transaction[]
+  
+  businessId     String
+  business       Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  description String
+  amount      Float
+  currency    String   @default("ARS")
+  exchangeRate Float?  @default(1) // Para convertir a moneda base si es diferente
+  date        DateTime @default(now())
+  type        String
+
+  // Créditos y Deudas
+  esCredito        Boolean   @default(false)
+  estado           String    @default("COBRADO") // COBRADO | PAGADO | PENDIENTE | VENCIDO
+  fechaVencimiento DateTime?
+
+  // Datos Fiscales (Facturación)
+  invoiceType      String?   // A, B, C, E, M, NotaCredito, etc.
+  invoiceNumber    String?   // 0001-00001234
+  invoiceFileUrl   String?   // Link a foto o PDF del comprobante
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id])
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id])
+
+  areaNegocioId String?
+  areaNegocio   AreaNegocio? @relation(fields: [areaNegocioId], references: [id])
+
+  businessId     String
+  business       Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Producto {
+  id            String            @id @default(uuid())
+  nombre        String
+  descripcion   String?
+  categoria     String?
+  marca         String?
+  unidad        String            @default("unidad")
+  metodoCosteo  String            @default("PROMEDIO") // PROMEDIO | FIFO | LIFO
+  currency      String            @default("ARS")      // Moneda del producto
+  precioVenta   Float             @default(0)
+  precioCosto   Float             @default(0)
+  stockActual   Float             @default(0)
+  enTransito    Float             @default(0)
+  activo        Boolean           @default(true)
+  movimientos   MovimientoStock[]
+
+  businessId     String
+  business       Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model MovimientoStock {
+  id         String   @id @default(uuid())
+  tipo       String   // ENTRADA | SALIDA | AJUSTE
+  cantidad   Float
+  precio     Float    @default(0)
+  motivo     String?
+  fecha      DateTime @default(now())
+  productoId String
+  producto   Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+}
+
+model AreaNegocio {
+  id           String        @id @default(uuid())
+  nombre       String        
+  descripcion  String?
+  transactions Transaction[]
+
+  businessId     String
+  business       Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@unique([nombre, businessId]) // El nombre es único SOLO dentro del mismo negocio
+}
+
+model Contact {
+  id           String        @id @default(uuid())
+  name         String
+  phone        String?
+  email        String?
+  taxId        String?       // CUIT / CUIL / DNI del contacto
+  type         String        // CLIENT, SUPPLIER
+  transactions Transaction[]
+
+  businessId     String
+  business       Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model BienDeUso {
+  id            String   @id @default(uuid())
+  nombre        String
+  descripcion   String?
+  categoria     String   // TECNOLOGIA | MOBILIARIO | VEHICULO | HERRAMIENTA | INMUEBLE | OTRO
+  fechaCompra   DateTime
+  valorCompra   Float
+  currency      String   @default("ARS")
+  vidaUtilMeses Int      @default(60)  // Meses de vida útil estimada (default 5 años)
+  valorResidual Float    @default(0)   // Valor residual al final de vida útil
+  estado        String   @default("EN_USO") // EN_USO | VENDIDO | DADO_DE_BAJA
+  notas         String?
+  activo        Boolean  @default(true)
+
+  businessId     String
+  business       Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
