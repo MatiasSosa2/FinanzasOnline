@@ -1,22 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Financiero - Proyecto de Gestión
 
-## Getting Started
+Este proyecto es una aplicación web de gestión financiera construida con [Next.js](https://nextjs.org), Prisma y bases de datos relacionales (SQLite por defecto para desarrollo).
 
-First, run the development server:
+## Requisitos Previos
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- [Node.js](https://nodejs.org/) (versión 18 o superior recomendada)
+- [Git](https://git-scm.com/)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Instrucciones de Instalación
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Sigue estos pasos para configurar y ejecutar el proyecto localmente:
+
+1.  **Clonar el repositorio:**
+    ```bash
+    git clone <URL_DEL_REPOSITORIO>
+    cd financiero
+    ```
+
+2.  **Instalar dependencias:**
+    ```bash
+    npm install
+    # o
+    yarn install
+    ```
+
+3.  **Configurar variables de entorno:**
+    Copia el archivo de ejemplo `.env.example` a `.env`:
+    ```bash
+    cp .env.example .env
+    # En Windows (PowerShell):
+    Copy-Item .env.example .env
+    ```
+    Edita el archivo `.env` con tus propios valores secretos (si aplica). Para desarrollo local, los valores por defecto suelen funcionar bien.
+
+4.  **Configurar la base de datos:**
+    Inicializa la base de datos (creará el archivo `dev.db`):
+    ```bash
+    npx prisma migrate dev --name init
+    # Si quieres poblar la base de datos con datos de prueba:
+    npx prisma db seed
+    ```
+
+5.  **Ejecutar el servidor de desarrollo:**
+    ```bash
+    npm run dev
+    ```
+
+6.  **Abrir en el navegador:**
+    Visita [http://localhost:3000](http://localhost:3000) para ver la aplicación.
+
+## Estructura del Proyecto
+
+- `src/app`: Rutas y páginas de la aplicación (App Router).
+- `src/components`: Componentes reutilizables de React.
+- `src/lib`: Utilidades, configuración de Prisma y autenticación.
+- `prisma`: Esquema de la base de datos y migraciones.
+- `public`: Archivos estáticos.
+
+## Scripts Disponibles
+
+- `npm run dev`: Inicia el servidor de desarrollo.
+- `npm run build`: Construye la aplicación para producción.
+- `npm start`: Inicia el servidor de producción.
+- `npm run lint`: Ejecuta el linter para encontrar problemas en el código.
+
+## Licencia
+
+[MIT](https://choosealicense.com/licenses/mit/)
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
