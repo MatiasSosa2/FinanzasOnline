@@ -2,13 +2,13 @@ import { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
 const isMock = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true' || process.env.USE_MOCK_DATA === 'true';
+const prisma = isMock ? null : require("@/lib/prisma").default;
 
 export const authOptions: NextAuthOptions = {
-  adapter: isMock ? undefined : PrismaAdapter(prisma),
+  adapter: isMock || !prisma ? undefined : PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
   },
@@ -37,6 +37,7 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) throw new Error("Credenciales inválidas");
         
         try {
+          if (!prisma) return null;
           const user = await prisma.user.findUnique({ where: { email: credentials.email } });
           if (!user || !user.password) {
              if (credentials.email === "demo@finarg.com" && credentials.password === "Demo1234") {
