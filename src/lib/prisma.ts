@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { PrismaLibSQL } from '@prisma/adapter-libsql'
+import { PrismaLibSql } from '@prisma/adapter-libsql'
 import { createClient } from '@libsql/client'
 
 const prismaClientSingleton = () => {
@@ -12,7 +12,7 @@ const prismaClientSingleton = () => {
       url: connectionString,
       authToken,
     })
-    const adapter = new PrismaLibSQL(libsql)
+    const adapter = new PrismaLibSql(libsql)
     return new PrismaClient({ adapter })
   }
 
