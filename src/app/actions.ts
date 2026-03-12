@@ -21,6 +21,24 @@ async function ensureDefaults() {
   return;
 }
 
+// Helper temporal para obtener el contexto de negocio
+// TODO: Reemplazar por obtención real desde sesión de usuario
+async function getBusinessId() {
+  // Intentamos obtener el primer negocio disponible
+  const business = await prisma.business.findFirst()
+  
+  if (business) return business.id
+
+  // Si no hay negocios, creamos uno por defecto (Demo) para que la app funcione
+  const newBusiness = await prisma.business.create({
+    data: {
+      name: 'Empresa Demo',
+      currency: 'ARS'
+    }
+  })
+  return newBusiness.id
+}
+
 export async function getAccounts() {
   // await ensureDefaults() // Eliminado temporalmente
   return await prisma.account.findMany() // TODO: Filtrar por businessId
@@ -438,10 +456,12 @@ export async function createAreaNegocio(formData: FormData): Promise<ActionResul
   }
 
   try {
+    const businessId = await getBusinessId()
     await prisma.areaNegocio.create({
       data: {
         nombre: parsed.data.nombre,
         descripcion: parsed.data.descripcion || null,
+        businessId,
       }
     })
   } catch {
@@ -498,7 +518,13 @@ export async function createCategory(formData: FormData): Promise<ActionResult> 
     return { success: false, error: parsed.error.issues[0].message }
   }
 
-  await prisma.category.create({ data: parsed.data })
+  const businessId = await getBusinessId()
+  await prisma.category.create({ 
+    data: {
+      ...parsed.data,
+      businessId,
+    } 
+  })
   revalidatePath('/')
   return { success: true }
 }
@@ -575,11 +601,14 @@ export async function createProducto(formData: FormData): Promise<ActionResult> 
   const parsed = createProductoSchema.safeParse(raw)
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message }
 
+  const businessId = await getBusinessId()
+
   await prisma.producto.create({ data: {
     ...parsed.data,
     descripcion: parsed.data.descripcion || null,
     categoria: parsed.data.categoria || null,
     marca: parsed.data.marca || null,
+    businessId,
   }})
   revalidatePath('/stock')
   return { success: true }
@@ -790,6 +819,8 @@ export async function createBienDeUso(formData: FormData): Promise<ActionResult>
   const parsed = createBienDeUsoSchema.safeParse(raw)
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message }
 
+  const businessId = await getBusinessId()
+
   const { fechaCompra, descripcion, notas, nombre, valorCompra, currency, ...rest } = parsed.data
   const fechaDate = new Date(fechaCompra)
 
@@ -802,6 +833,7 @@ export async function createBienDeUso(formData: FormData): Promise<ActionResult>
       fechaCompra: fechaDate,
       descripcion: descripcion || null,
       notas: notas || null,
+      businessId,
     },
   })
 
@@ -813,7 +845,13 @@ export async function createBienDeUso(formData: FormData): Promise<ActionResult>
     // Buscar o crear categoría "Bienes de Uso"
     let cat = await prisma.category.findFirst({ where: { name: 'Bienes de Uso', type: 'EXPENSE' } })
     if (!cat) {
-      cat = await prisma.category.create({ data: { name: 'Bienes de Uso', type: 'EXPENSE' } })
+      cat = await prisma.category.create({ 
+        data: { 
+          name: 'Bienes de Uso', 
+          type: 'EXPENSE',
+          business: { connect: { id: businessId } },
+        } 
+      })
     }
 
     await prisma.transaction.create({
@@ -827,6 +865,7 @@ export async function createBienDeUso(formData: FormData): Promise<ActionResult>
         estado: 'PAGADO',
         account: { connect: { id: accountId } },
         category: { connect: { id: cat.id } },
+        business: { connect: { id: businessId } },
       },
     })
 

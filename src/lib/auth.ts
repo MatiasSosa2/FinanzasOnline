@@ -59,7 +59,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, token }) {
       if (session.user && token.sub) {
-        session.user.id = token.sub; // Añadir ID a la sesión para usarlo en el frontend
+        (session.user as any).id = token.sub; // Añadir ID a la sesión para usarlo en el frontend
       }
       return session;
     },
