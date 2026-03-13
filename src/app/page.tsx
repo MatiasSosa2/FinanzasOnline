@@ -9,6 +9,8 @@ import { DonutChart, Sparkline, StackedAreaChart } from '@/components/ReportChar
 import AlertsBanner from '@/components/AlertsBanner'
 import type { AlertItem } from '@/components/AlertsBanner'
 
+export const dynamic = 'force-dynamic'
+
 export default async function Home() {
   const accounts = await getAccounts()
   const categories = await getCategories()

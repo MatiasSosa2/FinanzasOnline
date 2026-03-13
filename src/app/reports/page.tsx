@@ -8,6 +8,8 @@ import PeriodFilter from '@/components/PeriodFilter'
 import Link from 'next/link'
 import { Suspense } from 'react'
 
+export const dynamic = 'force-dynamic'
+
 const CURRENCY_SYMBOL: Record<string, string> = { ARS: '$', USD: 'US$' }
 const MONTH_NAMES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 const MILITARY = '#4A6741'
